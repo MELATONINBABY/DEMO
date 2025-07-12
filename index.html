@@ -1,9 +1,11 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>富途资金后台原型</title>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>富途资金后台作业原型</title>
 <style>
-/* 主题 */
+/* 1. 主题变量 */
 :root{
   --primary:#2253ff;
   --primary-hover:#3e7bff;
@@ -18,7 +20,7 @@
   font-family:"Noto Sans SC",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif;
   color:var(--text);
 }
-/* 布局 */
+/* 2. 基础布局 */
 body{margin:0;background:var(--bg);display:flex;min-height:100vh;}
 nav{
   width:var(--sidebar-w);background:#172554;color:#fff;display:flex;flex-direction:column;
@@ -30,8 +32,8 @@ nav a{
 }
 nav a.active,nav a:hover{background:rgba(255,255,255,.1);color:#fff;}
 nav svg{width:18px;height:18px;flex-shrink:0;}
-/* 主内容 */
-main{flex:1;padding:24px;overflow:auto;}
+/* 3. 主内容区域 */
+main{flex:1;padding:24px;overflow:auto; padding-bottom: 80px; } /* 新增 padding-bottom 以留出空间，避免footer覆盖内容 */
 .page{display:none;animation:fade .25s;}
 .page.active{display:block;}
 @keyframes fade{from{opacity:.3;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -40,13 +42,13 @@ main{flex:1;padding:24px;overflow:auto;}
   border-radius:var(--radius);box-shadow:var(--shadow);
   padding:20px;margin-bottom:24px;
 }
-/* 表格样式 */
+/* 4. 表格样式 */
 table{width:100%;border-collapse:collapse;font-size:14px;}
 th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
 th{background:#f1f5f9;font-weight:600;}
 .badge{display:inline-block;padding:2px 8px;font-size:12px;border-radius:12px;color:#fff}
 .badge.pending{background:#eab308}.badge.matched{background:#10b981}
-/* 表头工具 */
+/* 5. 表头工具栏 */
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
 .toolbar input,.toolbar select{
   padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);background:#fff;font-size:14px;
@@ -58,7 +60,9 @@ th{background:#f1f5f9;font-weight:600;}
 .button.primary{background:var(--primary);color:#fff}
 .button.primary:hover{background:var(--primary-hover)}
 .button.ghost{background:#fff;border:1px solid var(--border);color:var(--text);}
-/* 弹窗 */
+.button.reject{background:#dc3545;color:#fff;}
+.button.reject:hover{background:#c82333;}
+/* 6. 弹窗 */
 .modal-cover{
   position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000;
 }
@@ -73,11 +77,11 @@ th{background:#f1f5f9;font-weight:600;}
 .candidate{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px}
 .progress{flex:0 0 90px;height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden}
 .progress>span{display:block;height:100%;background:#10b981}
-/* 右侧动作卡片 */
+/* 7. 右侧动作卡片 */
 .side-card{border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:#fff;margin-bottom:16px}
 .radio-group{display:flex;gap:16px;margin:12px 0}
 textarea{width:100%;min-height:80px;padding:8px;border:1px solid var(--border);border-radius:var(--radius);resize:vertical}
-/* 步骤 */
+/* 8. 步骤条 */
 .steps{display:flex;gap:16px;margin-bottom:24px}
 .step{display:flex;flex-direction:column;align-items:center;font-size:12px;color:var(--text-light)}
 .step .circle{
@@ -85,67 +89,90 @@ textarea{width:100%;min-height:80px;padding:8px;border:1px solid var(--border);b
 }
 .step.active .circle{background:var(--primary);color:#fff}
 .step.active{color:var(--primary)}
-/* 9. 响应式 */
+/* 9. Tab 样式 */
+.tab-container { margin-top: 20px; }
+.tab-header { display: flex; border-bottom: 1px solid var(--border); }
+.tab-button { padding: 10px 20px; border: none; background: none; cursor: pointer; }
+.tab-button.active { border-bottom: 2px solid var(--primary); font-weight: 600; }
+.tab-content { padding: 16px; display: none; }
+.tab-content.active { display: block; }
+/* 10. 响应式 */
 @media(max-width:768px){
   nav{position:fixed;left:-100%;transition:left .3s}
   nav.show{left:0}
   main{padding:16px}
   .toolbar input{flex:1 1 120px}
 }
-/* 滑入菜单按钮 */
-.menu-btn{display:none;position:fixed;top:16px;left:16px;z-index:1100;background:var(--primary);border:none;color:#fff;width:36px;height:36px;border-radius:50%;}
-@media(max-width:768px){.menu-btn{display:block}}
+/* 11. 免责声明*/
+footer.disclaimer {
+    position: fixed; 
+    bottom: 0; 
+    left: 0; 
+    width: 99%; 
+    background: #f1f5f9; 
+    border-bottom: 1px solid var(--border); 
+    padding: 5px 10px; 
+    font-size: 11px; /
+    line-height: 1.2; 
+    color: var(--text-light);
+    z-index: 1000; 
+    overflow: auto; 
+}
+footer.disclaimer p { margin: 2px 0; } 
 </style>
 </head>
 <body>
 
 <button class="menu-btn" onclick="toggleMenu()">☰</button>
 
-<!-- =============== 侧边栏 =============== -->
+
 <nav id="sidebar">
   <h1>资金系统</h1>
-  <a href="#page-list" class="active" onclick="navTo(event)"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 13h2v-2H3v2m4 0h2v-2H7v2m4 0h2v-2h-2v2m4 0h2v-2h-2v2m4 0h2v-2h-2v2M3 17h2v-2H3v2m0 4h2v-2H3v2m4 0h2v-2H7v2m4 0h2v-2h-2v2m4 0h2v-2h-2v2m4 0h2v-2h-2v2M3 9h18V3H3v6z"></path></svg>来账列表</a>
-  <a href="#page-approval" onclick="navTo(event)"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13 9H7v6h6V9m6-8H5a2 2 0 0 0-2 2v18l4-4h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Z"></path></svg>审批详情</a>
-  <a href="#page-refund" onclick="navTo(event)"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M5,13V11H11V5H13V11H19V13H13V19H11V13H5Z"></path></svg>退回指令</a>
+  
+  <a href="#page-list" class="active" onclick="navTo(event)"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 13h2v-2H3v2m4 0h2v-2H7v2m4 0h2v-2h-2v2m4 0h2v-2h-2v2m4 0h2v-2h-2v2M3 17h2v-2H3v2m0 4h2v-2H3v2m4 0h2v-2H7v2m4 0h2v-2h-2v2m4 0h2v-2h-2v2m4 0h2v-2h-2v2M3 9h18V3H3v6z"/></svg>待办列表页</a>
+  <a href="#page-detail" onclick="navTo(event)"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13 9H7v6h6V9m6-8H5a2 2 0 0 0-2 2v18l4-4h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Z"/></svg>匹配/详情页</a>
+  <a href="#page-refund" onclick="navTo(event)"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M5,13V11H11V5H13V11H19V13H13V19H11V13H5Z"/></svg>退回指令页</a>
 </nav>
 
-<!-- =============== 主内容 =============== -->
+
 <main>
 
-  <!-- 1. 来账列表页 -->
+  <!-- 8.1 待办列表页 -->
   <section class="page active" id="page-list">
     <div class="card">
       <div class="toolbar">
         <button class="button primary" onclick="openModal()">认领</button>
-        <input type="date">
+        <input type="date" />
         <select><option>全部币种</option><option>USD</option><option>HKD</option></select>
         <input type="text" placeholder="金额起" style="width:80px">
         <span>-</span>
         <input type="text" placeholder="金额止" style="width:80px">
         <input type="search" placeholder="关键字搜索…" style="flex:1 1 160px">
         <span class="badge pending">待匹配 28</span>
+        <button class="button primary">批量通过</button>
+        <button class="button reject">批量退回</button>
       </div>
 
       <div style="overflow-x:auto">
       <table>
         <thead>
           <tr>
-            <th>银行流水号</th><th>入账时间</th><th>转入金额</th><th>币种</th>
-            <th>付款人姓名</th><th>付款银行</th><th>富途账号</th><th>匹配状态</th><th>操作</th>
+            <th>银行流水号</th><th>到账时间</th><th>金额</th><th>来源姓名</th>
+            <th>客户号 (若匹配)</th><th>匹配分数</th><th>状态</th><th>操作</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>BK202507090001</td><td>2025-07-09 09:12</td><td>100.00</td><td>USD</td>
-            <td>张明</td><td>中国银行</td><td>FT123456</td>
+            <td>BK202507090001</td><td>2025-07-09 09:12</td><td>100.00 USD</td>
+            <td>张明</td><td>FT123456</td><td>90%</td>
             <td><span class="badge pending">待匹配</span></td>
-            <td><button class="button ghost" onclick="openModal()">认领</button></td>
+            <td><button class="button ghost" onclick="openModal()">认领</button> <button class="button ghost">详情</button></td>
           </tr>
           <tr>
-            <td>BK202507090002</td><td>2025-07-09 09:16</td><td>50,000.00</td><td>HKD</td>
-            <td>Li Wei</td><td>HSBC</td><td>FT654321</td>
+            <td>BK202507090002</td><td>2025-07-09 09:16</td><td>50,000.00 USD</td>
+            <td>Li Wei</td><td>-</td><td>60%</td>
             <td><span class="badge matched">已匹配</span></td>
-            <td><button class="button ghost">查看</button></td>
+            <td><button class="button ghost">详情</button></td>
           </tr>
         </tbody>
       </table>
@@ -153,30 +180,37 @@ textarea{width:100%;min-height:80px;padding:8px;border:1px solid var(--border);b
     </div>
   </section>
 
-  <!-- 2. 审批详情页 -->
-  <section class="page" id="page-approval">
+  <!-- 8.2 匹配/详情页 -->
+  <section class="page" id="page-detail">
     <div class="card" style="display:flex;flex-wrap:wrap;gap:24px">
       <!-- 左 -->
       <div style="flex:1 1 380px;min-width:300px">
-        <h2 style="margin-top:0">入金审批 <span class="badge pending">待复审</span></h2>
+        <h2 style="margin-top:0">匹配/审批详情 <span class="badge pending">待复审</span></h2>
         <h1 style="margin:8px 0;font-size:28px;color:var(--primary)">$+100.00 USD</h1>
         <table>
           <tbody>
             <tr><th>银行流水号</th><td>BK202507090001</td></tr>
-            <tr><th>入账时间</th><td>2025-07-09 09:12</td></tr>
-            <tr><th>付款人</th><td>张明</td></tr>
+            <tr><th>到账时间</th><td>2025-07-09 09:12</td></tr>
+            <tr><th>来源姓名</th><td>张明</td></tr>
             <tr><th>付款银行</th><td>中国银行</td></tr>
-            <tr><th>富途账号</th><td>FT123456</td></tr>
+            <tr><th>备注</th><td>FT123456</td></tr>
             <tr><th>系统匹配账号</th><td>FT123456 (张明)</td></tr>
           </tbody>
         </table>
-        <h3>银行回单</h3>
-        <div style="border:1px solid var(--border);border-radius:var(--radius);height:160px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:var(--text-light)">回单缩略图</div>
+        <h3>资金来源截图 (附件)</h3>
+        <div style="border:1px solid var(--border);border-radius:var(--radius);height:160px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:var(--text-light)">附件截图预览</div>
       </div>
       <!-- 右 -->
       <div style="flex:1 1 260px;min-width:240px">
         <div class="side-card">
-          <div>风控评分</div>
+          <div>系统候选账号 Top3 (按相似度排序)</div>
+          <div class="candidate">FT123456 (张明)<div class="progress"><span style="width:90%"></span></div></div>
+          <div class="candidate">FT654321 (张明)<div class="progress"><span style="width:80%"></span></div></div>
+          <div class="candidate">FT987654 (Zhang Ming)<div class="progress"><span style="width:75%"></span></div></div>
+          <input type="search" placeholder="手动搜索客户编号/姓名…" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px">
+          <button class="button primary" style="width:100%;margin-bottom:12px">确认匹配</button>
+          
+          <div>自动风控打分 / AML 告警</div>
           <div style="height:8px;background:linear-gradient(90deg,#ef4444 0%,#facc15 50%,#22c55e 100%);border-radius:4px;margin:8px 0 16px;position:relative">
             <div style="position:absolute;left:70%;top:-6px;width:2px;height:20px;background:#0003"></div>
           </div>
@@ -184,17 +218,36 @@ textarea{width:100%;min-height:80px;padding:8px;border:1px solid var(--border);b
 
           <div class="radio-group">
             <label><input type="radio" name="decision"> 通过</label>
-            <label><input type="radio" name="decision"> 拒绝</label>
+            <label><input type="radio" name="decision"> 拒绝 (必填意见)</label>
           </div>
           <textarea placeholder="审批意见…"></textarea>
-          <button class="button primary" style="width:100%;margin-top:12px">提交复审</button>
+          <button class="button primary" style="width:100%;margin-top:12px">提交审批</button>
           <button class="button ghost" style="width:100%;margin-top:6px" onclick="navToHash('#page-list')">返回</button>
         </div>
       </div>
     </div>
+    <!-- 历史日志 Tab -->
+    <div class="tab-container card">
+      <div class="tab-header">
+        <button class="tab-button active" onclick="showTab('basic')">基本信息</button>
+        <button class="tab-button" onclick="showTab('log')">历史日志</button>
+      </div>
+      <div id="tab-basic" class="tab-content active">
+        <p>基本信息内容（已在上方显示）。</p>
+      </div>
+      <div id="tab-log" class="tab-content">
+        <table>
+          <thead><tr><th>时间</th><th>操作者</th><th>变更</th></tr></thead>
+          <tbody>
+            <tr><td>2025-07-12 09:30</td><td>系统</td><td>状态: Received → PendingMatch</td></tr>
+            <tr><td>2025-07-12 09:35</td><td>Ops001</td><td>匹配客户: FT123456</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
 
-  <!-- 3. 退回指令页 -->
+
   <section class="page" id="page-refund">
     <div class="card">
       <div class="steps">
@@ -205,19 +258,19 @@ textarea{width:100%;min-height:80px;padding:8px;border:1px solid var(--border);b
       <div style="display:flex;flex-wrap:wrap;gap:24px">
         <!-- 表单 -->
         <div style="flex:1 1 320px;min-width:260px">
-          <label>退回理由</label><br>
+          <label>退回理由 (下拉)</label><br>
           <select style="width:100%;margin-bottom:12px">
-            <option>请选择</option><option>异名入金</option><option>金额不符</option>
+            <option>请选择</option><option>异名入金</option><option>金额不符</option><option>其他</option>
           </select>
-          <label>退回账户</label><br>
-          <input type="text" disabled="" value="张明  ****1234" style="width:100%;margin-bottom:12px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius)">
+          <label>退回账户 (系统自动填充)</label><br>
+          <input type="text" disabled value="来源账户: 中国银行 - 张明" style="width:100%;margin-bottom:12px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius)">
           <label>金额</label><br>
-          <input type="text" disabled="" value="100.00 USD" style="width:100%;margin-bottom:12px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius)">
-          <label><input type="checkbox"> 同步邮件通知客户</label>
+          <input type="text" disabled value="100.00 USD" style="width:100%;margin-bottom:12px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius)">
+          <label><input type="checkbox"> 同步通知客户</label>
         </div>
         <!-- 预览 -->
         <div style="flex:1 1 280px;min-width:240px">
-          <div style="border:1px solid var(--border);border-radius:var(--radius);height:280px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:var(--text-light)">PDF 预览</div>
+          <div style="border:1px solid var(--border);border-radius:var(--radius);height:280px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:var(--text-light)">SWIFT/本地转账指令 PDF 预览</div>
         </div>
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:24px">
@@ -229,7 +282,16 @@ textarea{width:100%;min-height:80px;padding:8px;border:1px solid var(--border);b
 
 </main>
 
-<!-- =============== 匹配弹窗 =============== -->
+<footer class="disclaimer">
+    <p><strong>Copyright © 2025 Lin Xiaohan. All rights reserved.</strong> This prototype and its code are the intellectual property of the author. No part may be reproduced, modified, or distributed without explicit written permission from the author.</p>
+    <p><strong>版权声明 © 2025 林小涵。保留所有权利。</strong> 本原型及其代码为作者知识产权，未经作者书面许可，不得复制、修改或传播。</p>
+    <p><strong>Disclaimer:</strong> This webpage is an <strong>interactive interface prototype designed solely for the Futu 2025 Campus Recruitment Test</strong>. All content, including UI design and data, is fictional and created for demonstration purposes only. It does not represent the official position of any organization, company, or individual. Any modification, reproduction, distribution, or commercial use without the author’s explicit written consent is strictly prohibited. This content <strong>must not</strong> be used in production, commercial, or trading environments. The author assumes no liability for any direct or indirect consequences resulting from the use of this page.</p>
+    <p><strong>免责声明：</strong>本页面为<strong>富途 2025 校园招聘测试</strong>设计的交互界面展示，所有内容（包括界面设计与数据）均为虚构，仅用于校园招聘笔试展示，不代表任何组织、企业或个人的官方立场。本页面的所有权归作者所有，未经作者书面许可，禁止任何形式的修改、复制、传播或商业用途。本页面内容<strong>不得</strong>在生产环境或商业用途中使用。作者不对因使用本页面内容导致的任何直接或间接后果承担责任。</p>
+</footer>
+
+
+
+
 <div class="modal-cover" id="matchModal">
   <div class="modal">
     <div class="modal-header">匹配入金</div>
@@ -244,9 +306,9 @@ textarea{width:100%;min-height:80px;padding:8px;border:1px solid var(--border);b
       </div>
       <div class="col">
         <div style="margin-bottom:8px;font-weight:600">系统候选账号</div>
-        <div class="candidate">FT123456 (张明)<div class="progress"><span style="width:100%"></span></div></div>
+        <div class="candidate">FT123456 (张明)<div class="progress"><span style="width:90%"></span></div></div>
         <div class="candidate">FT654321 (张明)<div class="progress"><span style="width:80%"></span></div></div>
-        <div class="candidate">FT987654 (Zhang Ming)<div class="progress"><span style="width:60%"></span></div></div>
+        <div class="candidate">FT987654 (Zhang Ming)<div class="progress"><span style="width:75%"></span></div></div>
         <input type="search" placeholder="搜索客户编号/姓名…" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius)">
       </div>
     </div>
@@ -258,26 +320,32 @@ textarea{width:100%;min-height:80px;padding:8px;border:1px solid var(--border);b
 </div>
 
 <script>
-/* 导航切换 */
+
 function navTo(e){
   e.preventDefault();
   const hash=e.currentTarget.getAttribute('href');
   navToHash(hash);
-  if(window.innerWidth<768)toggleMenu(); /* 小屏自动收起 */
+  if(window.innerWidth<768)toggleMenu(); 
 }
 function navToHash(hash){
   document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')===hash));
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active','#'+p.id===hash));
   location.hash=hash;
 }
-/* 匹配弹窗 */
+
 function openModal(){document.getElementById('matchModal').style.display='flex'}
 function closeModal(){document.getElementById('matchModal').style.display='none'}
-/* 移动端菜单 */
+
+function showTab(tabId) {
+  document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + tabId).classList.add('active');
+}
+
 function toggleMenu(){document.getElementById('sidebar').classList.toggle('show')}
 window.addEventListener('hashchange',()=>navToHash(location.hash||'#page-list'));
 window.addEventListener('load',()=>navToHash(location.hash||'#page-list'));
 </script>
-
-
-</body></html>
+</body>
+</html>
